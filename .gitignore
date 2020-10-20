@@ -1,0 +1,19 @@
+.env
+.DS_STORE
+
+dist/
+node_modules/
+resources/
+images/output.png
+
+#individual files
+apiTest.js
+server/one-time-password-95a0ab9f1f99.json
+server/router/routes/milkAPI.js
+server/router/routes/fetchTest.js
+
+
+
+
+
+

@@ -1,0 +1,161 @@
+const mongoose = require('mongoose');
+const express = require('express');
+const db = require('mongo');
+
+const TodoList = require('../../models/todoList');
+const Todo = require('../../models/todo');
+const api = require('./visionAPI');
+
+
+mongoose.connect(process.env.MONGO,{poolSize: 10, bufferMaxEntries: 0, reconnectTries: 5000, useNewUrlParser: true},  (err, db) => {
+    console.log(err == null ? 'mongoose connected': err);
+});
+
+
+//NEW COLLECTION
+// (async () => {
+    // const schema = new createCollection({
+    //     list: ['hi']
+    // });
+    // const Model = mongoose.model('TudoPi', TodoList);
+// Explicitly create the collection before using it
+// so the collection is capped.
+//     await TodoList.createCollection().then(ASINS =>{
+//                 console.log(ASINS);
+//
+//             })
+//             .catch(err => {
+//                 console.log({message: err})
+//             });
+//     })();
+
+
+
+//UPDATE DB WITH NEW LIST
+const updateDB = () => {
+    let d;
+    //get new list
+    api().then((d) => {
+        console.log(d);
+        TodoList.updateOne({list:d},
+            function (err, docs) {
+                if (err){
+                    console.log(err)
+                }
+                else{
+                    console.log("Updated Docs : ", docs);
+                }
+            });
+    }).then((d) => {
+        TodoList.findOne({} , function (err, data) {
+            console.log(err,data.list);
+
+
+            let i = 0;
+        // , new: true, setDefaultsOnInsert: true
+
+            while(i < data.list.length){
+                console.log(data.list[i]);
+
+                d = data.list[i];
+                var query = {"todo_description": d },
+                    update = { $set: {"todo_description": d}},
+                    options = { upsert: true };
+
+                Todo.updateOne(query, update, options, function(error, result) {
+                    if (error) return;
+
+                    // // do something with the document
+                    // const todo = new Todo({
+                    //     todo_description: d
+                    // });
+                    //
+                    // console.log('todo', todo)
+                    //
+                    // todo
+                    //     .save()
+                    //     .then(todo => {
+                    //         console.log('Task succesful', todo)
+                    //
+                    //     })
+                    //     .catch(err => {
+                    //         // res.status(400).json({ todos: "ERROR: Task could not be added." });
+                    //     });
+                }).then(todo => {
+                            console.log('Task succesful', todo)
+
+                        })
+                        .catch(err => {
+                            // res.status(400).json({ todos: "ERROR: Task could not be added." });
+                        });
+
+                i++;
+            }
+
+
+
+
+              // Find the document
+
+
+            // Todo.findOne({}, function (err, data) {
+            //     const todo = new Todo({
+            //
+            //         todo_description: d
+            //     });
+            //
+            //     todo
+            //         .save()
+            //         .then(todo => {
+            //             console.log('Task succesful', todo)
+            //
+            //         })
+            //         .catch(err => {
+            //             // res.status(400).json({ todos: "ERROR: Task could not be added." });
+            //         });
+            // })
+
+            });
+
+    });
+
+}
+
+
+
+
+
+
+// async function run() {
+//     // Create a new mongoose model
+//     // const personSchema = new mongoose.Schema({
+//     //     name: String
+//     // });
+//     const Person = mongoose.model('todolists', personSchema, 'todolists');
+//
+//     // Create a change stream. The 'change' event gets emitted when there's a
+//     // change in the database
+//     Person.watch().
+//     on('change', data => console.log(new Date(), data));
+//
+//     // // Insert a doc, will trigger the change stream handler above
+//     // console.log(new Date(), 'Inserting doc');
+//     // await Person.create({ name: 'Axl Rose' });
+// }
+//
+// run();
+
+
+
+
+const newPhoto = async () => {
+    await updateDB()
+};
+
+
+module.exports = newPhoto;
+ // TodoList.updateOne(
+ //    {"Items.Response.GetMatchingProductForId.Id":  Pro.Response.GetMatchingProductForId.Id},{"Items":Pro}, {
+ //        upsert: true
+ //    })
+
