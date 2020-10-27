@@ -37,6 +37,8 @@ const api = async function() {
     });
 
 
+
+
     //remove excess fat
     for(var i = 0; i < array.length; ++i)
         array[i] = array[i].replace(/(\r\n|\n|\r)/gm,"");
